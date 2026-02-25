@@ -104,6 +104,17 @@ weather$batteryFlag <- ifelse(weather$BatVolt < 8500, 1, 0)
 
 ## prompt 3
 ### function that checks for unrealistic ranges in air temp and solar radiation
+ggplot(weather, aes(x = dateF, y = SolRad)) +
+  geom_line()
+ggplot(weather, aes(x = dateF, y = AirTemp)) +
+  geom_line()
+
+solRadAndAirTempCheck <- function(solar_data_vector, air_temp_vector){
+  
+  sol_intervals <- solar_data_vector[-length(solar_data_vector)] %--% solar_data_vector[-1]
+  sol_interval_times <- int_length(sol_intervals)
+  sol_intervals[sol_interval_times != air_temp_vector]
+}
 
 ## prompt 4
 ### winter air temp plot from Jan-March 2021 and look for snow accumulation
@@ -122,6 +133,7 @@ minTempC <- (35 - 32) / (9/5)
 weather$dmy <- make_date(year = weather$year, 
                          month = weather$month, 
                          day = mday(weather$dateF))
+#### add up daily precipitation and get minimum daily air temp
 totalPrecip <- weather %>% 
   filter(between(month, 3, 4) &
            year == 2021) %>% 
@@ -139,4 +151,16 @@ for(i in 1:nrow(totalPrecip)) {
 }
 
 sum(totalPrecip$dailyPrecip, na.rm = TRUE)
+sum(!is.na(totalPrecip$dailyPrecip))
+nrow(totalPrecip)
 
+## prompt 6
+### alter time function to include user specified time interval
+timeCheck <- function(date_vector, time_interval){
+  intervals <- date_vector[-length(date_vector)] %--% date_vector[-1]
+  interval_times <- int_length(intervals)
+  intervals[interval_times != time_interval]
+}
+#### soil data read in earlier
+soilData$dateF <- ymd_hm(soilData$Timestamp)
+timeCheck(soilData$dateF, 3600)
