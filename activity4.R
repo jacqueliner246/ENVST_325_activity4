@@ -85,8 +85,8 @@ ggplot(checkSensor, aes(x = dateET, y = SolRad)) +
 ggplot(weather[weather$doy > 121 & weather$doy < 274 ,], 
        aes(x = dateF, y = Precip)) +
   geom_col(color = 'steelblue') +
-  labs(x = "Date", y = "Precipitation (mm/hour)") +
-  theme_bw() # data unreliable may-june (no large or trace events)
+  labs(x = "Date", y = "Precipitation (mm)") +
+  theme_classic() # data unreliable may-june (no large or trace events)
 #### filter out issues
 precipIssues <- weather %>% 
   filter(AirTemp >= 0 |
@@ -94,7 +94,49 @@ precipIssues <- weather %>%
            YLevel < abs(2) |
            month == 5 |
            month == 6)
+#### see how many data points were removed
 nrow(weather) - nrow(precipIssues)
 
+## prompt 2
+### setting up a flag when battery drops below 8.5 V
+#### BatVolt col is in mV so convert 8.5 V to mV
+weather$batteryFlag <- ifelse(weather$BatVolt < 8500, 1, 0)
 
+## prompt 3
+### function that checks for unrealistic ranges in air temp and solar radiation
+
+## prompt 4
+### winter air temp plot from Jan-March 2021 and look for snow accumulation
+winterAir <- weather %>% 
+  filter(between(month, 1, 3) &
+           year == 2021)
+ggplot(winterAir, aes(x = dateF, y = AirTemp)) +
+  geom_line(color = 'slategrey') +
+  labs(x = "Date", y = "Air Temperature (°C)") +
+  theme_classic()
+
+## prompt 5
+### total precipitation March-April 2021
+#### air temp measured in C so need to turn 35 F to C
+minTempC <- (35 - 32) / (9/5)
+weather$dmy <- make_date(year = weather$year, 
+                         month = weather$month, 
+                         day = mday(weather$dateF))
+totalPrecip <- weather %>% 
+  filter(between(month, 3, 4) &
+           year == 2021) %>% 
+  group_by(doy, dmy) %>% 
+  summarise(dailyPrecip = sum(Precip),
+            minAirTemp = min(AirTemp))
+
+for(i in 1:nrow(totalPrecip)) {
+  totalPrecip$dailyPrecip[i] <- ifelse(i == 1, 
+                                       ifelse(totalPrecip$minAirTemp[i] < minTempC, 
+                                              NA, totalPrecip$dailyPrecip[i]),
+                                       ifelse(totalPrecip$minAirTemp[i] < minTempC | 
+                                                totalPrecip$minAirTemp[(i-1)] < minTempC,
+                                              NA, totalPrecip$dailyPrecip[i]))
+}
+
+sum(totalPrecip$dailyPrecip, na.rm = TRUE)
 
