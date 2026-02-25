@@ -1,7 +1,7 @@
 ## ENVST 325 Activity 4
 ## Author: Jacqueline Reynaga
 ## Date Created: 2-24-26
-## Date Last Modified: 2-24-26
+## Date Last Modified: 2-25-26
 
 install.packages(c("dplyr", "lubridate", "ggplot2"))
 library(dplyr)
@@ -65,14 +65,36 @@ for(i in 8:(length(weather$AirTemp))) {
 weather$airMA <- airMA
 
 ## prompt 2
-#### solar radiation measurements issues on the sensor in May and June of 2021
+### solar radiation measurements issues on the sensor in May and June of 2021
+weather$doy <- yday(weather$dateF)
+weather$month <- month(weather$dateF)
+weather$year <- year(weather$dateF)
+
 checkSensor <- weather %>% 
-  filter(month(weather$dateF) == 5 |
-           month(weather$dateF) == 6)
+  filter(weather$month == 5 |
+           weather$month == 6)
 ggplot(checkSensor, aes(x = dateET, y = SolRad)) +
   geom_line()
 
 
 # homework prompts --------------------------------------------------------
+## prompt 1
+### precipitation data issues
+
+#### check precipitation visualization
+ggplot(weather[weather$doy > 121 & weather$doy < 274 ,], 
+       aes(x = dateF, y = Precip)) +
+  geom_col(color = 'steelblue') +
+  labs(x = "Date", y = "Precipitation (mm/hour)") +
+  theme_bw() # data unreliable may-june (no large or trace events)
+#### filter out issues
+precipIssues <- weather %>% 
+  filter(AirTemp >= 0 |
+           XLevel < abs(2) |
+           YLevel < abs(2) |
+           month == 5 |
+           month == 6)
+nrow(weather) - nrow(precipIssues)
+
 
 
