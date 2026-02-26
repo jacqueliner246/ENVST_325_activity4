@@ -110,12 +110,17 @@ ggplot(weather, aes(x = dateF, y = AirTemp)) +
   geom_line()
 
 solRadAndAirTempCheck <- function(solar_data_vector, air_temp_vector){
-  
-  sol_intervals <- solar_data_vector[-length(solar_data_vector)] %--% solar_data_vector[-1]
-  sol_interval_times <- int_length(sol_intervals)
-  sol_intervals[sol_interval_times != air_temp_vector]
-}
+  print("solar radiation values out of range:")
+  for(i in length(solar_data_vector)) {
+    if(!between(solar_data_vector[i], 0, 1750)) solar_data_vector[i]
+  }
 
+  print("air temp values out of range:")
+  for(i in length(air_temp_vector)) {
+    if(!between(air_temp_vector[i], -50, 60))  air_temp_vector[i]
+  }
+}
+solRadAndAirTempCheck(weather$SolRad, weather$AirTemp)
 ## prompt 4
 ### winter air temp plot from Jan-March 2021 and look for snow accumulation
 winterAir <- weather %>% 
