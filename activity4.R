@@ -1,7 +1,7 @@
 ## ENVST 325 Activity 4
 ## Author: Jacqueline Reynaga
 ## Date Created: 2-24-26
-## Date Last Modified: 2-25-26
+## Date Last Modified: 2-26-26
 
 install.packages(c("dplyr", "lubridate", "ggplot2"))
 library(dplyr)
@@ -104,11 +104,6 @@ weather$batteryFlag <- ifelse(weather$BatVolt < 8500, 1, 0)
 
 ## prompt 3
 ### function that checks for unrealistic ranges in air temp and solar radiation
-ggplot(weather, aes(x = dateF, y = SolRad)) +
-  geom_line()
-ggplot(weather, aes(x = dateF, y = AirTemp)) +
-  geom_line()
-
 solRadAndAirTempCheck <- function(solar_data_vector, air_temp_vector){
   print("solar radiation values out of range:")
   for(i in length(solar_data_vector)) {
@@ -121,6 +116,7 @@ solRadAndAirTempCheck <- function(solar_data_vector, air_temp_vector){
   }
 }
 solRadAndAirTempCheck(weather$SolRad, weather$AirTemp)
+
 ## prompt 4
 ### winter air temp plot from Jan-March 2021 and look for snow accumulation
 winterAir <- weather %>% 
